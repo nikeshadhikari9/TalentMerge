@@ -7,5 +7,5 @@ connectDB();
 
 //starting a server
 app.listen(PORT, () => {
-    console.log("Server running on Port:", PORT, "\nhhtp://localhost:", PORT);
+    console.log("Server running on Port:", PORT, "\nhttp://localhost:", PORT);
 })

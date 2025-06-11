@@ -1,6 +1,6 @@
 require('dotenv').config('../.env');
 //exporting environment variables
-modules.exports = {
+module.exports = {
     PORT: process.env.SERVER_PORT,
     MONGODB_URI: process.env.MONGODB_URI,
     CORS_ORIGIN: process.env.CORS_ORIGIN,

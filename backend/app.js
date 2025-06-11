@@ -8,7 +8,7 @@ const { CORS_ORIGIN, NODE_ENV, SESSION_SECRET } = require("./config/env.config")
 const app = express();
 
 // Importing backend routes under /api/v1 
-const v1Router = require('./src/api/v1/index.route')
+const v1Router = require('./src/api/v1/index.routes')
 
 // Connecting backend with frontend server
 const isProduction = NODE_ENV === "production";

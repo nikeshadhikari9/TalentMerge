@@ -8,12 +8,6 @@ const organizationSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
-  username: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
   email: {
     type: String,
     required: true,
@@ -53,15 +47,17 @@ const organizationSchema = new mongoose.Schema({
 });
 organizationSchema.pre("save", async function (next) {
   try {
+    if (!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(this.password, salt);
-    this.password = hashedPassword;
+
+    this.password = await bcrypt.hash(this.password, salt);
     this.salt = salt;
     next();
   } catch (error) {
     next(error);
   }
 });
+
 
 const Organization = mongoose.model("Organization", organizationSchema);
 module.exports = Organization;
