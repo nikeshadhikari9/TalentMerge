@@ -72,7 +72,6 @@ const login = async (req, res) => {
             // For job seeker, exclude sensitive data
             const { password, salt, ...jobseekerData } = result.user.toObject();
             req.session.jobseeker = jobseekerData;
-            console.log(req.session.jobseeker)
         }
 
         // Send response
@@ -105,6 +104,30 @@ const logout = async (req, res) => {
         return res.json({ message: 'Server ko successfully' });
     }
 }
+const getUser = async (req, res) => {
+    try {
+        if (!req.session.jobseeker || !req.session.organization) {
+            return res.status(401).json({
+                message: "User not LoggedIn"
+            })
+        } else if (req.session.jobseeker) {
+            const user = req.session.jobseeker;
+            res.status(200).json({
+                message: "User Logged In",
+                user
+            })
+        }
+        else {
+            const user = req.session.organization;
+            res.status(200).json({
+                message: "User Logged In",
+                user
+            })
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 
-module.exports = { register, login, logout }
+module.exports = { register, login, logout, getUser }
