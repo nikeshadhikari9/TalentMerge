@@ -5,17 +5,17 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const [showMenu, setShowMenu] = useState(false);
-  const [token, setToken] = useState(true);
-  useEffect(() => {
-    API.get("/auth/is-loggedIn")
-      .then((res) => {
-        setIsWorking(res.data.isWorking);
-      })
-      .catch((err) => {
-        console.error("Error:", err);
-        setIsWorking(false);
-      });
-  }, []);
+  // const [token, setToken] = useState(true);
+  // useEffect(() => {
+  //   API.get("/auth/is-loggedIn")
+  //     .then((res) => {
+  //       setIsWorking(res.data.isWorking);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Error:", err);
+  //       setIsWorking(false);
+  //     });
+  // }, []);
 
   return (
     <div className='flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg'>
