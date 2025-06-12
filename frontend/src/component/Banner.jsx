@@ -2,29 +2,38 @@ import React from 'react'
 import { assets } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 
-const Banner = () => {
-
-    const navigate = useNavigate();
-
-  return (
-    <div className='flex bg-violet-700 rounded-lg  sm:px-10 md:px-14 lg:px-6 my-10 md:mx-10'>
-        {/* ---------- left side---------- */}
-        <div className='flex-1 py-8 sm:py-10 md:py-16 lg:py-24 lg:pl-5'>
-            <div className='text-xl sm:text-2xl md:text-3xl lg:text-5xl font-semibold text-white'>
-            <p>Create Account</p>
-            <p className='mt-1'>To stay connected!</p>
+const Banner = () => (
+    <section className='py-16'>
+      <div className='container mx-auto px-4'>
+        <div className='bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl shadow-2xl overflow-hidden'>
+          <div className='flex flex-col md:flex-row items-center'>
+            {/* Left side */}
+            <div className='flex-1 py-12 px-8 md:px-12 lg:px-16'>
+              <h2 className='text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6'>
+                Create Account
+                <br />
+                <span className='text-yellow-300'>To stay connected!</span>
+              </h2>
+              <button 
+                onClick={() => navigate('/login')} 
+                className='bg-white text-violet-700 font-semibold px-8 py-4 rounded-full hover:bg-gray-100 hover:shadow-lg transition-all duration-300 transform hover:scale-105 hover:-translate-y-1'
+              >
+                SignUp Now
+              </button>
             </div>
-            <button onClick={()=>{navigate('login'); scrollTo(0,0)}} className='bg-white text-sm sm:text-base text-gray-600 px-8 py-3 rounded-full mt-6 hover:scale-105 transition-all'>SignUp Now </button>
+            
+            {/* Right side */}
+            <div className='hidden md:block md:w-1/2 lg:w-auto relative'>
+              <img 
+                className='w-full max-w-sm xl:max-w-md h-auto' 
+                src={assets.header_img} 
+                alt="Join us"
+              />
+            </div>
+          </div>
         </div>
-        
-
-        {/* ---------- right side---------- */}
-        <div className='hidden md:block md:-1/2 lg:w-[370px] relative'>
-            <img className='w-full absolute bottom-0 right-0 max-w-md' src={assets.appointment_img} alt="" />
-        </div>
-      
-    </div>
-  )
-}
+      </div>
+    </section>
+  );
 
 export default Banner
