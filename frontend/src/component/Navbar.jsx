@@ -5,23 +5,17 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const [showMenu, setShowMenu] = useState(false);
-  const [token, setToken] = useState(true);
-  useEffect(() => {
-    API.get("/auth/is-loggedIn")
-      .then((res) => {
-        setIsWorking(res.data.isWorking);
-      })
-      .catch((err) => {
-        console.error("Error:", err);
-        setIsWorking(false);
-      });
-  }, []);
 
   return (
-    <div className='flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg'>
-      <img onClick={() => navigate('/')} className='w-27 cursor-pointer' src={assets.logo} alt="" />
-     
-      <div className='flex items-center gap-3'>
+    <div className="flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg">
+      <img
+        onClick={() => navigate("/")}
+        className="w-27 cursor-pointer"
+        src={assets.logo}
+        alt=""
+      />
+
+      <div className="flex items-center gap-3">
         {/* {
           token ? <div className='flex items-center gap-2 cursor-pointer group relative'>
             <img className='w-8 rounded-full' src={assets.profile_pic} alt="" />
@@ -35,8 +29,18 @@ const Navbar = () => {
           </div>
             : 
         } */}
-        <button onClick={() => navigate('/login')} className='bg-white text-violet-700 px-8 py-3 rounded-full font-light hidden md:block hover:bg-stone-200 mx-2 '>Create Account</button>
-        <img onClick={() => setShowMenu(true)} className='w-6 md:hidden' src={assets.menu_icon} alt="" />
+        <button
+          onClick={() => navigate("/login")}
+          className="bg-white text-violet-700 px-8 py-3 rounded-full font-light hidden md:block hover:bg-stone-200 mx-2 "
+        >
+          Create Account
+        </button>
+        <img
+          onClick={() => setShowMenu(true)}
+          className="w-6 md:hidden"
+          src={assets.menu_icon}
+          alt=""
+        />
         {/* mobile menu */}
         <div
           className={`${
