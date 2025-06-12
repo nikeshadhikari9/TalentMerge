@@ -10,22 +10,9 @@ const Navbar = () => {
   return (
     <div className='flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg'>
       <img onClick={() => navigate('/')} className='w-27 cursor-pointer' src={assets.logo} alt="" />
-      <ul className='hidden md:flex items-start gap-5 font-medium'>
-        <NavLink to='/'>
-          <li className='py-1 text-white'>HOME</li>
-          <hr className='border-none outline-none h-0.5 bg-white w-3/5 m-auto hidden' />
-        </NavLink>
-        <NavLink to='/about'>
-          <li className='py-1 text-white'>ABOUT</li>
-          <hr className='border-none outline-none h-0.5 bg-white w-3/5 m-auto hidden' />
-        </NavLink>
-        <NavLink to='/contact'>
-          <li className='py-1 text-white'>CONTACT</li>
-          <hr className='border-none outline-none h-0.5 bg-white w-3/5 m-auto hidden' />
-        </NavLink>
-      </ul>
+     
       <div className='flex items-center gap-3'>
-        {
+        {/* {
           token ? <div className='flex items-center gap-2 cursor-pointer group relative'>
             <img className='w-8 rounded-full' src={assets.profile_pic} alt="" />
             <img className='w-2.5' src={assets.dropdown_icon} alt="" />
@@ -36,8 +23,9 @@ const Navbar = () => {
               </div>
             </div>
           </div>
-            : <button onClick={() => navigate('/login')} className='bg-white text-violet-700 px-8 py-3 rounded-full font-light hidden md:block hover:bg-stone-200 mx-2 '>Create Account</button>
-        }
+            : 
+        } */}
+        <button onClick={() => navigate('/login')} className='bg-white text-violet-700 px-8 py-3 rounded-full font-light hidden md:block hover:bg-stone-200 mx-2 '>Create Account</button>
         <img onClick={() => setShowMenu(true)} className='w-6 md:hidden' src={assets.menu_icon} alt="" />
         {/* mobile menu */}
         <div className={`${showMenu ? 'fixed w-full' : 'h-0 w-0'} md:hidden right-0 top-0 z-20 overflow-hidden bg-white transition-all`}>
