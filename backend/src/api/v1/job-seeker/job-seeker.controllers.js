@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const JobSeeker = require('../../../../models/job-seeker.models');
+const Job = require('../../../../models/job.models');
 const mongoose = require('mongoose');
 
 // Initialize or update learning track
@@ -402,6 +403,15 @@ const resumeUpload = async (req, res) => {
         });
     }
 };
+const applyJob = async (req, res) => {
+    try {
+        const { jobId } = req.body
+        const applicant = req.session.jobseeker;
+        await 
+    } catch (error) {
+
+    }
+}
 
 module.exports = {
     initializeLearningTrack,
