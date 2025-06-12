@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const [state, setState] = useState('Sign Up');
@@ -14,13 +15,47 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const onSubmitHandler = (e) => {
+  const onSubmitHandler = async (e) => {
     e.preventDefault();
 
-    if (role === 'Organization') {
-      navigate('/pages/OrganizationDashboard');
-    } else if (role === 'Job Seeker') {
-      navigate('/pages/UserDashboard');
+    if (state === 'Sign Up') {
+      const userData = {
+        role,
+        username,
+        email,
+        password,
+        ...(role === 'Job Seeker' && { fullName }),
+        ...(role === 'Organization' && {
+          orgName,
+          orgPlace,
+          orgType,
+        })
+      };
+
+      try {
+        await axios.post('http://localhost:3001/users', userData);
+        alert('Signup successful! Please log in.');
+        setState('Login');
+      } catch (error) {
+        alert('Signup failed!');
+        console.error(error);
+      }
+    } else {
+      try {
+        const res = await axios.get(`http://localhost:3001/users?email=${email}&password=${password}&role=${role}`);
+        if (res.data.length > 0) {
+          if (role === 'Organization') {
+            navigate('/pages/OrganizationDashboard');
+          } else {
+            navigate('/pages/UserDashboard');
+          }
+        } else {
+          alert('Invalid credentials or user not found!');
+        }
+      } catch (error) {
+        alert('Login failed!');
+        console.error(error);
+      }
     }
   };
 
@@ -30,7 +65,6 @@ const Login = () => {
         <p className='text-2xl font-semibold'>{state === 'Sign Up' ? "Create Account" : "Login"}</p>
         <p>Please {state === 'Sign Up' ? "sign up" : "log in"} for upcoming events and notifications</p>
 
-        {/* Role Selection FIRST */}
         <div className='w-full'>
           <p>You are:</p>
           <select className='border border-zinc-300 rounded w-full p-2 mt-1'
@@ -41,7 +75,6 @@ const Login = () => {
           </select>
         </div>
 
-        {/* Only show the rest when role is selected */}
         {role && (
           <>
             {state === 'Sign Up' && (
