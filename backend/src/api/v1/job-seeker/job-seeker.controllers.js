@@ -1,3 +1,5 @@
+const multer = require('multer');
+const path = require('path');
 const JobSeeker = require('../../../../models/job-seeker.models');
 const mongoose = require('mongoose');
 
@@ -5,8 +7,9 @@ const mongoose = require('mongoose');
 const initializeLearningTrack = async (req, res) => {
     const { userId, skillName, levelType } = req.body;
     const levelNumber = 1;
+
     // Validate required fields
-    if (!userId || !skillName || !levelType || !levelNumber) {
+    if (!userId || !skillName || !levelType) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
@@ -18,12 +21,7 @@ const initializeLearningTrack = async (req, res) => {
     // Validate level type
     const validLevelTypes = ["Beginner", "Intermediate", "Advanced"];
     if (!validLevelTypes.includes(levelType)) {
-        return res.status(400).json({ error: "Invalid level type" });
-    }
-
-    // Validate level number
-    if (typeof levelNumber !== 'number' || levelNumber < 1 || levelNumber > 10) {
-        return res.status(400).json({ error: "Level number must be between 1 and 10" });
+        return res.status(400).json({ error: "Invalid level type. Must be one of: Beginner, Intermediate, Advanced" });
     }
 
     try {
@@ -77,6 +75,17 @@ const completeLevel = async (req, res) => {
         return res.status(400).json({ error: "Invalid user ID format" });
     }
 
+    // Validate level type
+    const validLevelTypes = ["Beginner", "Intermediate", "Advanced"];
+    if (!validLevelTypes.includes(levelType)) {
+        return res.status(400).json({ error: "Invalid level type. Must be one of: Beginner, Intermediate, Advanced" });
+    }
+
+    // Validate level number
+    if (typeof levelNumber !== 'number' || levelNumber < 1 || levelNumber > 10) {
+        return res.status(400).json({ error: "Level number must be between 1 and 10" });
+    }
+
     try {
         const jobSeeker = await JobSeeker.findById(userId);
         if (!jobSeeker) {
@@ -84,12 +93,29 @@ const completeLevel = async (req, res) => {
         }
 
         // Find current learning track
-        const track = jobSeeker.learningTracks.find(
+        let track = jobSeeker.learningTracks.find(
             t => t.skillName === skillName && t.levelType === levelType
         );
 
+        // If track doesn't exist, create it
         if (!track) {
-            return res.status(404).json({ error: "Learning track not found" });
+            track = {
+                skillName,
+                levelType,
+                levelNumber: 1,
+                completed: false
+            };
+            jobSeeker.learningTracks.push(track);
+            await jobSeeker.save();
+        }
+
+        // Check if current level is already at maximum
+        if (track.levelNumber >= 10) {
+            return res.status(400).json({
+                error: `Maximum level (10) already reached for ${levelType} ${skillName}`,
+                currentLevel: track.levelNumber,
+                completed: track.completed
+            });
         }
 
         // Simulate quiz success (you can replace this with actual quiz logic)
@@ -100,17 +126,156 @@ const completeLevel = async (req, res) => {
 
         // Handle level completion based on current level
         if (levelType === "Beginner" && levelNumber === 10) {
-            return handleBeginnerCompletion(userId, skillName, res);
+            // Update current track
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $set: {
+                        "learningTracks.$[track].completed": true,
+                        "learningTracks.$[track].levelNumber": 10
+                    }
+                },
+                {
+                    arrayFilters: [
+                        { "track.skillName": skillName, "track.levelType": "Beginner" }
+                    ]
+                }
+            );
+
+            // Add badge and new track
+            const badge = {
+                name: `${skillName} Beginner`,
+                description: `Completed all levels in ${skillName} beginner track.`,
+                earnedAt: new Date(),
+                iconUrl: `/badges/${skillName.toLowerCase()}-beginner.png`
+            };
+
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $push: { badges: badge },
+                    $addToSet: {
+                        "learningTracks": {
+                            skillName,
+                            levelType: "Intermediate",
+                            levelNumber: 1,
+                            completed: false
+                        }
+                    }
+                },
+                { new: true }
+            );
+
+            return res.json({
+                message: "🎉 You've completed Beginner level!",
+                badge,
+                nextLevel: {
+                    levelType: "Intermediate",
+                    levelNumber: 1,
+                    skillName
+                }
+            });
         }
 
         if (levelType === "Intermediate" && levelNumber === 10) {
-            return handleIntermediateCompletion(userId, skillName, res);
+            // Update current track
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $set: {
+                        "learningTracks.$[track].completed": true,
+                        "learningTracks.$[track].levelNumber": 10
+                    }
+                },
+                {
+                    arrayFilters: [
+                        { "track.skillName": skillName, "track.levelType": "Intermediate" }
+                    ]
+                }
+            );
+
+            // Add badge and new track
+            const badge = {
+                name: `${skillName} Intermediate`,
+                description: `Completed all levels in ${skillName} intermediate track.`,
+                earnedAt: new Date(),
+                iconUrl: `/badges/${skillName.toLowerCase()}-intermediate.png`
+            };
+
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $push: { badges: badge },
+                    $addToSet: {
+                        "learningTracks": {
+                            skillName,
+                            levelType: "Advanced",
+                            levelNumber: 1,
+                            completed: false
+                        }
+                    }
+                },
+                { new: true }
+            );
+
+            return res.json({
+                message: "🎉 You've completed Intermediate level!",
+                badge,
+                nextLevel: {
+                    levelType: "Advanced",
+                    levelNumber: 1,
+                    skillName
+                }
+            });
         }
 
         if (levelType === "Advanced" && levelNumber === 10) {
-            return handleAdvancedCompletion(userId, skillName, res);
-        }
+            // Update current track
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $set: {
+                        "learningTracks.$[track].completed": true,
+                        "learningTracks.$[track].levelNumber": 10
+                    }
+                },
+                {
+                    arrayFilters: [
+                        { "track.skillName": skillName, "track.levelType": "Advanced" }
+                    ]
+                }
+            );
 
+            // Add badge and certificate
+            const badge = {
+                name: `${skillName} Advanced`,
+                description: `Completed all levels in ${skillName} advanced track.`,
+                earnedAt: new Date(),
+                iconUrl: `/badges/${skillName.toLowerCase()}-advanced.png`
+            };
+
+            const certificate = {
+                certificateImage: `/certificates/${skillName.toLowerCase()}-certificate.png`,
+                skillTypeCertificate: `${skillName} Full Track Certificate`
+            };
+
+            await JobSeeker.findByIdAndUpdate(
+                userId,
+                {
+                    $push: {
+                        badges: badge,
+                        certificates: certificate
+                    }
+                },
+                { new: true }
+            );
+
+            return res.json({
+                message: "🎓 Congratulations! You've completed the full track!",
+                badge,
+                certificate
+            });
+        }
         // Regular level completion
         const updatedJobSeeker = await JobSeeker.findOneAndUpdate(
             {
@@ -141,177 +306,105 @@ const completeLevel = async (req, res) => {
     }
 };
 
-// Helper function to handle Beginner level completion
-const handleBeginnerCompletion = async (userId, skillName, res) => {
+const getJobSeekerProfile = async (req, res) => {
     try {
-        // First, update the existing track
-        await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    "learningTracks.$[track].completed": true,
-                    "learningTracks.$[track].levelNumber": 10
+        // Check if user is authenticated
+        if (!req.session.jobseeker || !req.session.jobseeker._id) {
+            return res.status(401).json({ error: "Unauthorized - Please login" });
+        }
+
+        // Find user and exclude sensitive data
+        const user = await JobSeeker.findById(req.session.jobseeker._id)
+            .select('-password -salt')
+            .populate('learningTracks')
+            .populate('badges')
+            .populate('certificates');
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user: {
+                ...user.toObject(),
+                learningProgress: {
+                    totalTracks: user.learningTracks.length,
+                    completedTracks: user.learningTracks.filter(track => track.completed).length,
+                    totalBadges: user.badges.length,
+                    totalCertificates: user.certificates.length
                 }
-            },
-            {
-                arrayFilters: [
-                    { "track.skillName": skillName, "track.levelType": "Beginner" }
-                ]
-            }
-        );
-
-        // Then, add the badge and new track
-        const badge = {
-            name: `${skillName} Beginner`,
-            description: `Completed all levels in ${skillName} beginner track.`,
-            earnedAt: new Date(),
-            iconUrl: `/badges/${skillName.toLowerCase()}-beginner.png`
-        };
-
-        const updatedJobSeeker = await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $push: { badges: badge },
-                $addToSet: {
-                    "learningTracks": {
-                        skillName,
-                        levelType: "Intermediate",
-                        levelNumber: 1,
-                        completed: false
-                    }
-                }
-            },
-            { new: true }
-        );
-
-        return res.json({
-            message: "🎉 You've completed Beginner level!",
-            badge,
-            nextLevel: {
-                levelType: "Intermediate",
-                levelNumber: 1,
-                skillName
             }
         });
     } catch (error) {
-        console.error("Error in Beginner completion:", error);
-        return res.status(500).json({ error: "Failed to update progress" });
+        console.error("Error fetching job seeker profile:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to fetch profile"
+        });
     }
 };
 
-// Helper function to handle Intermediate level completion
-const handleIntermediateCompletion = async (userId, skillName, res) => {
-    try {
-        // First, update the existing track
-        await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    "learningTracks.$[track].completed": true,
-                    "learningTracks.$[track].levelNumber": 10
-                }
-            },
-            {
-                arrayFilters: [
-                    { "track.skillName": skillName, "track.levelType": "Intermediate" }
-                ]
-            }
-        );
-
-        // Then, add the badge and new track
-        const badge = {
-            name: `${skillName} Intermediate`,
-            description: `Completed all levels in ${skillName} intermediate track.`,
-            earnedAt: new Date(),
-            iconUrl: `/badges/${skillName.toLowerCase()}-intermediate.png`
-        };
-
-        const updatedJobSeeker = await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $push: { badges: badge },
-                $addToSet: {
-                    "learningTracks": {
-                        skillName,
-                        levelType: "Advanced",
-                        levelNumber: 1,
-                        completed: false
-                    }
-                }
-            },
-            { new: true }
-        );
-
-        return res.json({
-            message: "🎉 You've completed Intermediate level!",
-            badge,
-            nextLevel: {
-                levelType: "Advanced",
-                levelNumber: 1,
-                skillName
-            }
-        });
-    } catch (error) {
-        console.error("Error in Intermediate completion:", error);
-        return res.status(500).json({ error: "Failed to update progress" });
+// Set up Multer for file upload
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        const uploadPath = path.join(__dirname, '../../../../public/resume');
+        cb(null, uploadPath);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = file.originalname.split('.').pop();
+        cb(null, 'resume-' + uniqueSuffix + '.' + ext);
     }
-};
+});
 
-// Helper function to handle Advanced level completion
-const handleAdvancedCompletion = async (userId, skillName, res) => {
+const upload = multer({
+    storage,
+    fileFilter: function (req, file, cb) {
+        // Accept only PDF files
+        if (file.mimetype === 'application/pdf') {
+            cb(null, true);
+        } else {
+            cb(new Error('Only PDF files are allowed!'), false);
+        }
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
+});
+
+// POST /api/v1/jobseeker/upload-resume
+const resumeUpload = async (req, res) => {
     try {
-        // First, update the existing track
-        await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    "learningTracks.$[track].completed": true,
-                    "learningTracks.$[track].levelNumber": 10
-                }
-            },
-            {
-                arrayFilters: [
-                    { "track.skillName": skillName, "track.levelType": "Advanced" }
-                ]
-            }
-        );
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                error: "No file uploaded or invalid file type"
+            });
+        }
+        const jobseekerId = req.session.jobseeker._id;
+        const resumeUrl = `/resume/${req.file.filename}`;
 
-        // Then, add the badge and certificate
-        const badge = {
-            name: `${skillName} Advanced`,
-            description: `Completed all levels in ${skillName} advanced track.`,
-            earnedAt: new Date(),
-            iconUrl: `/badges/${skillName.toLowerCase()}-advanced.png`
-        };
+        await JobSeeker.findByIdAndUpdate(jobseekerId, {
+            resumeUrl
+        });
 
-        const certificate = {
-            certificateImage: `/certificates/${skillName.toLowerCase()}-certificate.png`,
-            skillTypeCertificate: `${skillName} Full Track Certificate`
-        };
-
-        const updatedJobSeeker = await JobSeeker.findByIdAndUpdate(
-            userId,
-            {
-                $push: {
-                    badges: badge,
-                    certificates: certificate
-                }
-            },
-            { new: true }
-        );
-
-        return res.json({
-            message: "🎓 Congratulations! You've completed the full track!",
-            badge,
-            certificate
+        return res.status(200).json({
+            success: true,
+            message: "Resume uploaded successfully!",
+            resumeUrl
         });
     } catch (error) {
-        console.error("Error in Advanced completion:", error);
-        return res.status(500).json({ error: "Failed to update progress" });
+        console.error("Error uploading resume:", error.message);
+        return res.status(500).json({
+            success: false,
+            error: "Could not save resume link"
+        });
     }
 };
 
 module.exports = {
     initializeLearningTrack,
-    completeLevel
+    completeLevel,
+    getJobSeekerProfile, resumeUpload, upload
 };

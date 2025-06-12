@@ -1,7 +1,6 @@
 const JobSeeker = require('../../../../models/job-seeker.models');
 const Organization = require('../../../../models/organization.models');
-const { matchPasswordAndGenerateToken } = require('./auth.service')
-
+const { matchPasswordAndGenerateToken } = require('./auth.service');
 const register = async (req, res) => {
     try {
         const { fullName, username, email, contactNumber, password, role } = req.body;
@@ -42,51 +41,58 @@ const register = async (req, res) => {
         return res.status(500).json({ message: 'Server ko error' });
     }
 }
-const loginUser = async (req, res) => {
+const login = async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
 
-        // Helper function to generate token and match password
-        const userData = await matchPasswordAndGenerateToken(email, password);
-
-        if (!userData) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        let userWithoutPassword;
-        let token;
-
-        if (role === "organization") {
-            const organization = await Organization.findById(userData._id);
-            req.session.organization = organization._id;
-            token = userData.token; // assuming your helper returns a JWT token
-            ({ password: _, ...userWithoutPassword } = organization.toObject());
-
-            return res.status(200).json({
-                message: "Organization logged in successfully",
-                role: "organization",
-                user: userWithoutPassword,
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: "Email and password are required"
             });
         }
 
-        if (role === "jobseeker") {
-            const jobSeeker = await JobSeeker.findById(userData._id);
-            req.session.jobseeker = jobSeeker._id;
-            token = userData.token;
-            ({ password: _, ...userWithoutPassword } = jobSeeker.toObject());
+        // Check credentials
+        const result = await matchPasswordAndGenerateToken(email, password);
 
-            return res.status(200).json({
-                message: "Job Seeker logged in successfully",
-                role: "jobseeker",
-                user: userWithoutPassword,
+        if (!result.success) {
+            return res.status(401).json({
+                success: false,
+                error: result.error
             });
         }
 
-        return res.status(400).json({ error: "Invalid role specified" });
+        // Set user data in session based on user type
+        if (result.userType === 'organization') {
+            // For organization, exclude sensitive data
+            const { password, salt, ...organizationData } = result.user.toObject();
+            req.session.organization = organizationData;
+        } else if (result.userType === 'jobseeker') {
+            // For job seeker, exclude sensitive data
+            const { password, salt, ...jobseekerData } = result.user.toObject();
+            req.session.jobseeker = jobseekerData;
+            console.log(req.session.jobseeker)
+        }
+
+        // Send response
+        return res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user: {
+                id: result.user._id,
+                email: result.user.email,
+                userType: result.userType,
+                fullName: result.user.fullName || result.user.organizationName
+            }
+        });
 
     } catch (error) {
         console.error("Login error:", error);
-        return res.status(500).json({ error: "Server error during login" });
+        return res.status(500).json({
+            success: false,
+            error: "Internal server error"
+        });
     }
 };
 const logout = async (req, res) => {
@@ -101,4 +107,4 @@ const logout = async (req, res) => {
 }
 
 
-module.exports = { register, loginUser, logout }
+module.exports = { register, login, logout }

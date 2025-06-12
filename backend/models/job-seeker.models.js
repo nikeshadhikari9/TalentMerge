@@ -106,6 +106,10 @@ const jobSeekerSchema = new mongoose.Schema(
         githubUrl: {
             type: String
         },
+        resumeUrl: {
+            type: String,
+            default: null
+        },
         // 👇 Add these two new arrays
         learningTracks: [learningTrackSchema],
         badges: [badgeSchema]
