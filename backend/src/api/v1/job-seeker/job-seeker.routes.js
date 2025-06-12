@@ -2,9 +2,9 @@
 const express = require('express');
 const router = express.Router();
 
-const { initializeLearningTrack, completeLevel, getJobSeekerProfile, resumeUpload, upload } = require('./job-seeker.controllers')
+const { initializeLearningTrack, completeLevel, getJobSeekerProfile, applyJob } = require('./job-seeker.controllers')
 router.post('/iniitialize-level', initializeLearningTrack);
 router.put('/complete-level', completeLevel);
 router.get('/view-profile', getJobSeekerProfile);
-router.post('/upload-resume', upload.single('resume'), resumeUpload)
+router.post('/apply-job', applyJob);
 module.exports = router; 
