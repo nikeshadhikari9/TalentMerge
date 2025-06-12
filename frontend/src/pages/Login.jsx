@@ -25,7 +25,7 @@ const Login = () => {
     try {
       const response = await authApi.login(formData);
 
-      if (response.data) {
+      if (response) {
         showToast(response.data.message, "success");
         // Redirect based on role
         if (response.data.role === "organization") {

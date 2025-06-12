@@ -3,7 +3,7 @@ const Organization = require('../../../../models/organization.models');
 const { matchPasswordAndGenerateToken } = require('./auth.service');
 const register = async (req, res) => {
     try {
-        const { fullName, username, email, contactNumber, password, role } = req.body;
+        const { fullName, username, email, password, role } = req.body;
         if (role === "organization") {
             const existedOrganizationEmail = await Organization.findOne({ email });
             if (existedOrganizationEmail) {
@@ -16,7 +16,7 @@ const register = async (req, res) => {
                 password: password,
 
             })
-            return res.status(201).json({ message: 'Organization registered successfully' });
+            return res.status(201).json({ message: 'Organization registered successfully', role: "organization" });
         }
         if (role === "jobseeker") {
             const existedJobSeekerEmail = await JobSeeker.findOne({ email });
@@ -32,7 +32,6 @@ const register = async (req, res) => {
                 username: username,
                 email: email,
                 password: password,
-
             })
             return res.status(201).json({ message: 'User registered successfully' });
         }
@@ -77,6 +76,7 @@ const login = async (req, res) => {
         // Send response
         return res.status(200).json({
             success: true,
+            role: result.userType,
             message: "Login successful",
             user: {
                 id: result.user._id,
