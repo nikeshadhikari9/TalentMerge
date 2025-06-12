@@ -405,16 +405,44 @@ const resumeUpload = async (req, res) => {
 };
 const applyJob = async (req, res) => {
     try {
-        const { jobId } = req.body
-        const applicant = req.session.jobseeker;
-        await 
-    } catch (error) {
+        const { jobId } = req.body;
 
+        // Get job seeker ID from session
+        const jobSeekerId = req.session.jobseeker;
+
+        if (!jobId || !jobSeekerId) {
+            return res.status(400).json({ error: "Missing jobId or user not logged in" });
+        }
+
+        // Find job and add applicant
+        const updatedJob = await Job.findByIdAndUpdate(
+            jobId,
+            {
+                $push: { applicants: jobSeekerId }
+            },
+            { new: true }
+        );
+
+        if (!updatedJob) {
+            return res.status(404).json({ error: "Job not found" });
+        }
+
+        res.json({
+            message: "Successfully applied!",
+            job: {
+                title: updatedJob.title,
+                applicantsCount: updatedJob.applicants.length
+            }
+        });
+
+    } catch (error) {
+        console.error("Error applying to job:", error.message);
+        res.status(500).json({ error: "Could not apply to job" });
     }
-}
+};
 
 module.exports = {
     initializeLearningTrack,
     completeLevel,
-    getJobSeekerProfile, resumeUpload, upload
+    getJobSeekerProfile, resumeUpload, upload, applyJob
 };
