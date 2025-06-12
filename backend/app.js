@@ -16,6 +16,7 @@ const isProduction = NODE_ENV === "production";
 app.use(cors({
     origin: CORS_ORIGIN,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 }))
 app.use(session({
     secret: SESSION_SECRET,

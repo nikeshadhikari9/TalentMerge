@@ -3,13 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { authApi } from "../services/api";
 
-const Login = () => {
+const Register = () => {
   const navigate = useNavigate();
-
   const { showToast } = useToast();
   const [formData, setFormData] = useState({
+    fullName: "",
+    username: "",
     email: "",
     password: "",
+    role: "jobseeker",
   });
 
   const handleChange = (e) => {
@@ -23,20 +25,16 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await authApi.login(formData);
-
+      const response = await authApi.register(formData);
       if (response.data) {
         showToast(response.data.message, "success");
-        // Redirect based on role
-        if (response.data.role === "organization") {
-          navigate("/organization-dashboard");
-        } else {
-          navigate("/user-dashboard");
-        }
+        navigate("/login");
       }
     } catch (error) {
-      console.log(error);
-      alert(error.response?.data?.message || "Login failed!");
+      showToast(
+        error.response?.data?.message || "Registration failed!",
+        "error"
+      );
     }
   };
 
@@ -45,14 +43,70 @@ const Login = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            Create your account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Welcome back! Please enter your details
+            Join our community and start your journey
           </p>
         </div>
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div>
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700"
+            >
+              I am a
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="jobseeker">Job Seeker</option>
+              <option value="organization">Organization</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              htmlFor="Name"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Name
+            </label>
+            <input
+              id="name"
+              name="fullName"
+              type="text"
+              required
+              value={formData.fullName}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {formData.role === "jobseeker" && (
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Username
+              </label>
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          )}
+
           <div>
             <label
               htmlFor="email"
@@ -89,44 +143,21 @@ const Login = () => {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="remember-me"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="text-blue-600 hover:text-blue-500">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
-
           <div>
             <button
               type="submit"
               className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Sign in
+              Create Account
             </button>
           </div>
         </form>
 
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:text-blue-500">
-              Sign up
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600 hover:text-blue-500">
+              Sign in
             </Link>
           </p>
         </div>
@@ -135,4 +166,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;

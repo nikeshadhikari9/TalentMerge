@@ -440,6 +440,13 @@ const applyJob = async (req, res) => {
         res.status(500).json({ error: "Could not apply to job" });
     }
 };
+const viewProfile = async (req, res) => {
+    try {
+
+    } catch (error) {
+
+    }
+}
 
 module.exports = {
     initializeLearningTrack,

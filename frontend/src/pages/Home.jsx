@@ -8,7 +8,7 @@ import Contact from '../component/Contact'
 
 const Home = () => {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50 mx-4 px-4 mt-2" >
       <Navbar />
       <Header />
       <About/>

@@ -18,7 +18,7 @@ const Navbar = () => {
   // }, []);
 
   return (
-    <div className="flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg">
+    <div className="flex item-center justify-between text-sm py-4 mb-5 border-b  border-b-gray-400 bg-violet-700 rounded-lg my-4">
       <img
         onClick={() => navigate("/")}
         className="w-27 cursor-pointer"
@@ -41,7 +41,7 @@ const Navbar = () => {
             : 
         } */}
         <button
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/register")}
           className="bg-white text-violet-700 px-8 py-3 rounded-full font-light hidden md:block hover:bg-stone-200 mx-2 "
         >
           Create Account
@@ -67,7 +67,7 @@ const Navbar = () => {
               alt=""
             />
           </div>
-          <ul className="flex flex-col items-center gap-2 px-5 text-lg font-medium mb-10 bg-violet-700 text-white">
+          {/* <ul className="flex flex-col items-center gap-2 px-5 text-lg font-medium mb-10 bg-violet-700 text-white">
             <NavLink onClick={() => setShowMenu(false)} to="/">
               <p className="px-4 py-2 rounded inline-block">HOME</p>
             </NavLink>
@@ -77,7 +77,7 @@ const Navbar = () => {
             <NavLink onClick={() => setShowMenu(false)} to="/contact">
               <p className="px-4 py-2 rounded inline-block">CONTACT</p>
             </NavLink>
-          </ul>
+          </ul> */}
         </div>
       </div>
     </div>
